@@ -130,7 +130,7 @@ model Postcard {
   description String?
   imageUrl    String
   thumbnailUrl String?
-  priceCents  Int      @default(5900)
+  priceCents  Int      @default(8900)
   categoryId  String
   isActive    Boolean  @default(true)
   sortOrder   Int      @default(0)
@@ -171,7 +171,7 @@ model Order {
   recipientEmail  String?
   shippingAddressId String?
   subtotalCents   Int         @default(0)
-  shippingCents   Int         @default(4900)
+  shippingCents   Int         @default(0)
   totalCents      Int         @default(0)
   stripeSessionId String?     @unique
   notes           String?
@@ -202,7 +202,7 @@ model OrderItem {
   fontFamily   FontFamily    @default(HANDWRITING)
   textAlignment TextAlignment @default(CENTER)
   charCount    Int           @default(0)
-  priceCents   Int           @default(5900)
+  priceCents   Int           @default(8900)
   previewData  Json?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt

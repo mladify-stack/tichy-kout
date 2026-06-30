@@ -44,9 +44,9 @@ export const APP_DESCRIPTION =
   "Napište krásný pohled někomu, na kom vám záleží. My jej vytiskneme a fyzicky odešleme poštou.";
 export const MAX_MESSAGE_LENGTH = 500;
 export const POSTCARD_PRICE_CENTS =
-  Number(process.env.NEXT_PUBLIC_POSTCARD_PRICE) || 5900;
-export const SHIPPING_PRICE_CENTS =
-  Number(process.env.NEXT_PUBLIC_SHIPPING_PRICE) || 4900;
+  Number(process.env.NEXT_PUBLIC_POSTCARD_PRICE) || 8900;
+/** Poštovné je zahrnuto v ceně pohledu */
+export const SHIPPING_PRICE_CENTS = 0;
 
 export const FONT_OPTIONS = [
   { value: "HANDWRITING", label: "Rukopis", className: "font-handwriting" },

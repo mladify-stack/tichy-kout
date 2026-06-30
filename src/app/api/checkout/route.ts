@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import { sanitizeText, generateOrderNumber, POSTCARD_PRICE_CENTS, SHIPPING_PRICE_CENTS } from "@/lib/utils";
+import { sanitizeText, generateOrderNumber, POSTCARD_PRICE_CENTS } from "@/lib/utils";
 import { shippingSchema } from "@/lib/validations";
 import { z } from "zod";
 
@@ -44,9 +44,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Pohled nenalezen" }, { status: 404 });
     }
 
-    const subtotal = draft.priceCents ?? postcard.priceCents ?? POSTCARD_PRICE_CENTS;
-    const shippingCents = SHIPPING_PRICE_CENTS;
-    const total = subtotal + shippingCents;
+    const total = POSTCARD_PRICE_CENTS;
 
     const address = await prisma.address.create({
       data: {
@@ -56,7 +54,7 @@ export async function POST(request: NextRequest) {
         city: sanitizeText(shipping.city),
         postalCode: shipping.postalCode.replace(/\s/g, ""),
         country: shipping.country,
-        phone: shipping.phone,
+        phone: shipping.phone || null,
       },
     });
 
@@ -66,10 +64,10 @@ export async function POST(request: NextRequest) {
         userId: session?.user?.id,
         status: "DRAFT",
         recipientName: sanitizeText(shipping.recipientName),
-        recipientEmail: shipping.recipientEmail.toLowerCase(),
+        recipientEmail: shipping.customerEmail.toLowerCase(),
         shippingAddressId: address.id,
-        subtotalCents: subtotal,
-        shippingCents,
+        subtotalCents: total,
+        shippingCents: 0,
         totalCents: total,
         items: {
           create: {
@@ -79,7 +77,7 @@ export async function POST(request: NextRequest) {
             fontFamily: draft.fontFamily,
             textAlignment: draft.textAlignment,
             charCount: draft.message.length,
-            priceCents: subtotal,
+            priceCents: total,
           },
         },
         payment: {
@@ -100,24 +98,16 @@ export async function POST(request: NextRequest) {
     const stripeSession = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
-      customer_email: shipping.recipientEmail,
+      customer_email: shipping.customerEmail,
       line_items: [
         {
           price_data: {
             currency: "czk",
             product_data: {
               name: `Pohled — ${postcard.name}`,
-              description: "Tištěný pohled s vaším vzkazem, odeslaný poštou",
+              description: "Tištěný pohled s vaším vzkazem včetně poštovného",
             },
-            unit_amount: subtotal,
-          },
-          quantity: 1,
-        },
-        {
-          price_data: {
-            currency: "czk",
-            product_data: { name: "Poštovné" },
-            unit_amount: shippingCents,
+            unit_amount: total,
           },
           quantity: 1,
         },

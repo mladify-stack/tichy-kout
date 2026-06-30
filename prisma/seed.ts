@@ -77,7 +77,7 @@ async function main() {
           description: `Klidný pohled — ${names[i]}`,
           imageUrl,
           thumbnailUrl: imageUrl,
-          priceCents: 5900,
+          priceCents: 8900,
           categoryId: category.id,
           sortOrder: i,
         },

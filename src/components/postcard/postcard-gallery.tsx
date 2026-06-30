@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { PostcardImage } from "@/components/postcard/postcard-image";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, POSTCARD_PRICE_CENTS } from "@/lib/utils";
 
 export interface GalleryPostcard {
   id: string;
@@ -37,7 +37,7 @@ export function PostcardGallery({ postcards }: PostcardGalleryProps) {
             <div className="p-4">
               <h2 className="font-serif text-lg">{postcard.name}</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                {formatPrice(postcard.priceCents)}
+                {formatPrice(POSTCARD_PRICE_CENTS)}
               </p>
             </div>
           </Link>

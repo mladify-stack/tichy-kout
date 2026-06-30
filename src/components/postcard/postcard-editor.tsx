@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Loader2 } from "lucide-react";
-import { PostcardPreview } from "./postcard-preview";
+import { PostcardDoublePreview } from "./postcard-double-preview";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -76,7 +76,7 @@ export function PostcardEditor({
       postcardSlug,
       postcardName,
       imageUrl,
-      priceCents,
+      priceCents: POSTCARD_PRICE_CENTS,
       message: data.message ?? message,
       signature: data.signature ?? signature ?? "",
       fontFamily: (data.fontFamily ?? fontFamily) as typeof draft.fontFamily,
@@ -134,7 +134,7 @@ export function PostcardEditor({
               <p className="font-serif text-2xl text-foreground">
                 Připravujeme váš pohled…
               </p>
-              <PostcardPreview
+              <PostcardDoublePreview
                 imageUrl={imageUrl}
                 message={message}
                 signature={signature}
@@ -162,7 +162,7 @@ export function PostcardEditor({
                 ❤️
               </motion.span>
               <h2 className="font-serif text-3xl">Váš pohled je připraven.</h2>
-              <PostcardPreview
+              <PostcardDoublePreview
                 imageUrl={imageUrl}
                 message={message}
                 signature={signature}
@@ -174,7 +174,7 @@ export function PostcardEditor({
                 Až budete připraveni, odešleme ho poštou někomu, na kom vám záleží.
               </p>
               <Button size="lg" onClick={handleSend} className="min-w-[200px]">
-                Odeslat za {formatPrice(priceCents || POSTCARD_PRICE_CENTS)}
+                Odeslat za {formatPrice(POSTCARD_PRICE_CENTS)}
               </Button>
               <button
                 type="button"
@@ -194,7 +194,7 @@ export function PostcardEditor({
     <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-2 lg:gap-12 lg:px-6">
       {/* Levá — náhled */}
       <div className="flex flex-col items-center lg:sticky lg:top-24 lg:self-start">
-        <PostcardPreview
+        <PostcardDoublePreview
           imageUrl={imageUrl}
           message={message}
           signature={signature}

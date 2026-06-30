@@ -132,7 +132,14 @@ export default function AdminPage() {
           <tbody>
             {orders.map((order) => (
               <tr key={order.id} className="border-b border-border/40">
-                <td className="py-3 pr-4 font-mono text-xs">{order.orderNumber}</td>
+                <td className="py-3 pr-4 font-mono text-xs">
+                  <Link
+                    href={`/admin/objednavka/${order.id}`}
+                    className="hover:underline"
+                  >
+                    {order.orderNumber}
+                  </Link>
+                </td>
                 <td className="py-3 pr-4">
                   {order.recipientName}
                   <br />
@@ -148,7 +155,14 @@ export default function AdminPage() {
                   {ORDER_STATUS_LABELS[order.status] ?? order.status}
                 </td>
                 <td className="py-3">
-                  <Select
+                  <div className="flex flex-col gap-2">
+                    <Link
+                      href={`/admin/objednavka/${order.id}`}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Rekapitulace
+                    </Link>
+                    <Select
                     value={order.status}
                     onValueChange={(v) => updateStatus(order.id, v)}
                   >
@@ -162,6 +176,7 @@ export default function AdminPage() {
                       <SelectItem value="DELIVERED">Doručená</SelectItem>
                     </SelectContent>
                   </Select>
+                  </div>
                 </td>
               </tr>
             ))}

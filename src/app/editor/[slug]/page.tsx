@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { PostcardEditor } from "@/components/postcard/postcard-editor";
 import { createMetadata } from "@/lib/seo";
+import { POSTCARD_PRICE_CENTS } from "@/lib/utils";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -39,7 +40,7 @@ export default async function EditorPage({ params }: PageProps) {
         postcardSlug={postcard.slug}
         postcardName={postcard.name}
         imageUrl={postcard.imageUrl}
-        priceCents={postcard.priceCents}
+        priceCents={POSTCARD_PRICE_CENTS}
       />
     </div>
   );

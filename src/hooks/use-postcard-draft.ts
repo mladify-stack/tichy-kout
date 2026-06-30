@@ -25,7 +25,7 @@ const defaultDraft: PostcardDraft = {
   signature: "",
   fontFamily: "HANDWRITING",
   textAlignment: "CENTER",
-  priceCents: 5900,
+  priceCents: 8900,
 };
 
 export function usePostcardDraft() {

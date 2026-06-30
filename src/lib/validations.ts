@@ -17,13 +17,13 @@ export const messageSchema = z.object({
 
 export const shippingSchema = z.object({
   recipientName: z.string().min(2, "Zadejte jméno příjemce"),
-  recipientEmail: z.string().email("Zadejte platný e-mail"),
   street: z.string().min(3, "Zadejte ulici a číslo popisné"),
   city: z.string().min(2, "Zadejte město"),
   postalCode: z
     .string()
     .regex(/^\d{3}\s?\d{2}$/, "Zadejte platné PSČ (123 45)"),
   country: z.string().default("CZ"),
+  customerEmail: z.string().email("Zadejte platný e-mail pro potvrzení"),
   phone: z.string().optional(),
 });
 
