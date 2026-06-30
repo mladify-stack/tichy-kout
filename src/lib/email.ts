@@ -1,8 +1,13 @@
 import { Resend } from "resend";
 
-export const resend = new Resend(process.env.RESEND_API_KEY);
-
 const fromEmail = process.env.EMAIL_FROM ?? "Tichý kout <noreply@tichy-kout.cz>";
+
+/** Lazy init — build must not require RESEND_API_KEY */
+function getResend(): Resend | null {
+  const key = process.env.RESEND_API_KEY;
+  if (!key || key.startsWith("re_...")) return null;
+  return new Resend(key);
+}
 
 export async function sendOrderConfirmationEmail(params: {
   to: string;
@@ -10,6 +15,9 @@ export async function sendOrderConfirmationEmail(params: {
   totalCents: number;
   recipientName: string;
 }) {
+  const resend = getResend();
+  if (!resend) return null;
+
   const { to, orderNumber, totalCents, recipientName } = params;
   const total = (totalCents / 100).toFixed(0);
 
@@ -35,6 +43,9 @@ export async function sendContactEmail(params: {
   email: string;
   message: string;
 }) {
+  const resend = getResend();
+  if (!resend) return null;
+
   const adminEmail = process.env.ADMIN_EMAILS?.split(",")[0]?.trim();
   if (!adminEmail) return null;
 
