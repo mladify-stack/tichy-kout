@@ -22,7 +22,7 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative flex min-h-[85vh] items-center justify-center overflow-hidden">
         <Image
-          src="https://images.unsplash.com/photo-1448375240806-882854db8510?w=1920&q=80&auto=format&fit=crop"
+          src="/postcards/hero.png"
           alt="Tichý les — místo pro zastavení"
           fill
           priority

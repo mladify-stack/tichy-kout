@@ -1,0 +1,33 @@
+# Vaše fotky pro pohledy
+
+Obrázky jsou ve formátu **PNG** ve složce `public/postcards/`.
+
+## Kategorie
+
+| Kategorie | Soubory |
+|-----------|---------|
+| Les | les-1.png … les-3.png |
+| Hory | hory-1.png … hory-3.png |
+| Moře | more-1.png … more-3.png |
+| Louky | louky-1.png … louky-3.png |
+| Déšť | dest-1.png … dest-3.png |
+| Káva | kava-1.png … kava-3.png |
+| **Nerdi** | nerdi-1.png … nerdi-3.png |
+| **Tichý kout special** | tichy-kout-special-1.png … 3.png |
+| Knihy | knihy-1.png … knihy-3.png |
+| Podzim | podzim-1.png … podzim-3.png |
+| Zima | zima-1.png … zima-3.png |
+| Minimalismus | minimalismus-1.png … minimalismus-3.png |
+| Úvodní fotka | hero.png |
+
+Kočky a psi byly odstraněny.
+
+## Po výměně fotek
+
+```powershell
+cd C:\Users\asistentka\Projects\tichy-kout
+npm run db:seed
+git add public/postcards
+git commit -m "Nove fotky"
+git push
+```

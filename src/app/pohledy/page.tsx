@@ -1,8 +1,7 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import Image from "next/image";
+import { PostcardGallery } from "@/components/postcard/postcard-gallery";
 import { createMetadata } from "@/lib/seo";
-import { formatPrice } from "@/lib/utils";
 
 export const metadata = createMetadata({
   title: "Vyber pohled",
@@ -77,34 +76,7 @@ export default async function PostcardsPage({ searchParams }: PageProps) {
         </ul>
       </nav>
 
-      {/* Galerie */}
-      <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {postcards.map((postcard) => (
-          <li key={postcard.id}>
-            <Link
-              href={`/editor/${postcard.slug}`}
-              className="group block overflow-hidden rounded-lg border border-border/60 bg-card transition-shadow hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <div className="relative aspect-[3/2] overflow-hidden">
-                <Image
-                  src={postcard.thumbnailUrl ?? postcard.imageUrl}
-                  alt={postcard.name}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  loading="lazy"
-                />
-              </div>
-              <div className="p-4">
-                <h2 className="font-serif text-lg">{postcard.name}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {formatPrice(postcard.priceCents)}
-                </p>
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <PostcardGallery postcards={postcards} />
 
       {postcards.length === 0 && (
         <p className="text-center text-muted-foreground">
