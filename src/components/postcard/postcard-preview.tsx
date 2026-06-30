@@ -7,7 +7,7 @@ import { FONT_OPTIONS } from "@/lib/utils";
 interface PostcardPreviewProps {
   imageUrl: string;
   message: string;
-  signature?: string;
+  signature?: string | null;
   fontFamily: string;
   textAlignment: string;
   className?: string;
