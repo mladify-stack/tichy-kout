@@ -20,7 +20,16 @@ export default function CartPage() {
 
   const form = useForm<ShippingFormData>({
     resolver: zodResolver(shippingSchema),
-    defaultValues: { country: "CZ" },
+    defaultValues: {
+      country: "CZ",
+      salutation: "",
+      recipientName: "",
+      street: "",
+      city: "",
+      postalCode: "",
+      customerEmail: "",
+      phone: "",
+    },
   });
 
   const salutation = form.watch("salutation");
@@ -119,7 +128,11 @@ export default function CartPage() {
             </CardContent>
           </Card>
 
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-8"
+            autoComplete="off"
+          >
             <fieldset className="space-y-4">
               <legend className="font-serif text-xl">Adresát</legend>
               <p className="text-sm text-muted-foreground">
@@ -132,7 +145,7 @@ export default function CartPage() {
                   id="salutation"
                   {...form.register("salutation")}
                   className="mt-1"
-                  placeholder="Manželé"
+                  autoComplete="off"
                 />
               </div>
 
@@ -142,7 +155,7 @@ export default function CartPage() {
                   id="recipientName"
                   {...form.register("recipientName")}
                   className="mt-1"
-                  placeholder="Vavřičkovi"
+                  autoComplete="off"
                 />
                 {form.formState.errors.recipientName && (
                   <p className="mt-1 text-xs text-destructive" role="alert">
@@ -157,7 +170,7 @@ export default function CartPage() {
                   id="street"
                   {...form.register("street")}
                   className="mt-1"
-                  placeholder="Družstevní 114"
+                  autoComplete="off"
                 />
                 {form.formState.errors.street && (
                   <p className="mt-1 text-xs text-destructive" role="alert">
@@ -172,7 +185,7 @@ export default function CartPage() {
                   id="city"
                   {...form.register("city")}
                   className="mt-1"
-                  placeholder="Cvikov"
+                  autoComplete="off"
                 />
                 {form.formState.errors.city && (
                   <p className="mt-1 text-xs text-destructive" role="alert">
@@ -187,7 +200,7 @@ export default function CartPage() {
                   id="postalCode"
                   {...form.register("postalCode")}
                   className="mt-1"
-                  placeholder="47154"
+                  autoComplete="off"
                 />
                 {form.formState.errors.postalCode && (
                   <p className="mt-1 text-xs text-destructive" role="alert">
