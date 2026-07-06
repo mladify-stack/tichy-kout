@@ -1,36 +1,36 @@
 import type { AiTextCategory } from "@prisma/client";
 
-/** Template-based AI text suggestions — works without OpenAI */
+/** Vzkazy pro „Pomoci s textem“ — 3 varianty na kategorii */
 const TEMPLATES: Record<AiTextCategory, string[]> = {
   PODĚKOVÁNÍ: [
-    "Chtěla jsem ti jen říct, jak moc si vážím toho, že jsi tu. Děkuji za každý malý okamžik, který jsme sdíleli.",
-    "Někdy slova nestačí — ale stejně je chci napsat. Děkuji ti za všechno, co děláš, i když to možná nevidíš.",
-    "Za tvou trpělivost, za tvůj smích, za to, že jsi. Děkuji.",
+    "Děkuju, že jsi tu byl, i když to nebylo zrovna snadné. Za obyčejné zprávy, trpělivost a chvíle, kdy nebylo potřeba moc mluvit. Vážím si toho víc, než umím říct.",
+    "Jen ti chci nechat malé děkuju. Za tvoji laskavost, spolehlivost a klid, který s sebou neseš. Někdy stačí málo, aby to pro druhého znamenalo hodně.",
+    "Děkuju za všechny ty malé věci, které se snadno přehlédnou. Za to, že si všímáš, že pomůžeš a že se dá o tebe opřít. Je v tom víc, než se na první pohled zdá.",
   ],
   POVZBUZENÍ: [
-    "Vím, že teď není snadné. Ale věřím v tebe — v to, kdo jsi, a v to, kam směřuješ.",
-    "Každý den je nová stránka. Dnes může být klidnější než včera — a to stačí.",
-    "Nejsi na to sama. A i když ano — zvládneš to. Krok po kroku.",
+    "Jen připomínám, že nemusíš být pořád silná. Můžeš zpomalit, na chvíli si sednout a nabrat dech. Všechno nemusí být hotové hned.",
+    "Posílám ti tichou podporu na dny, které se táhnou déle, než by měly.",
+    "Možná teď nevidíš moc daleko, ale to nevadí. Stačí kousek cesty před sebou. Zbytek může přijít později.",
   ],
   LÁSKA: [
-    "Miluji tě — ne za to, co děláš, ale za to, kdo jsi. Prostě za tebe.",
-    "Když myslím na domov, myslím na tebe. Tam, kde jsi ty, je mi dobře.",
-    "Někdy stačí být spolu. Bez slov. Ale dnes chci napsat: jsi můj nejkrásnější den.",
+    "S tebou mám pocit domova i tam, kde zrovna žádný není. V obyčejných dnech, v tichu i v malých rituálech. To je pro mě láska, která drží.",
+    "Když si v hlavě skládám místa, kam se ráda vracím, patříš mezi ně i ty. Možná právě proto, že s tebou nemusím nic předstírat. A to je vzácné.",
+    "Některé vztahy nejsou hlučné, a přesto nesou hodně. Ten náš tak vnímám. A jsem za něj opravdu vděčná.",
   ],
   OMLOUVA: [
-    "Vím, že jsem udělal chybu. Nechci se vymlouvat — chci se omluvit. Upřímně.",
-    "Lituji slov, která jsem řekl. Zasloužíš si víc než můj spěch a netrpělivost.",
-    "Omlouvám se. Ne proto, že musím — ale proto, že mi na tobě záleží.",
+    "Omlouvám se za to, co jsem řekla. Nemělo to zaznít tak, jak zaznělo, a chápu, že to mohlo zůstat v hlavě déle, než bych si přála. Mrzí mě to.",
+    "Vím, že jsem tě zklamala, a nechci kolem toho chodit opatrně jen proto, aby to bylo snazší mně. Nebylo to v pořádku. Je mi to líto.",
+    "Mrzí mě, že jsem ti přidala starost nebo smutek tam, kde jsem měla být spíš oporou. Vím, že omluva sama o sobě všechno nespraví. Přesto jsem ti ji chtěla poslat upřímně a bez výmluv.",
   ],
   VZPOMÍNKA: [
-    "Vzpomínám na ten den — na slunce, na smích, na to, jak jsme byli prostě spolu. Chybí mi to.",
-    "Některé chvíle nezmizí. Zůstávají v srdci jako teplý papír v kapse.",
-    "Minulost není pryč. Žije v nás — v každém podzimním listí, v každé vzpomínce na tebe.",
+    "Dnes mi vytanul jeden náš společný den a zůstal se mnou déle, než bývá zvykem. Tak ti ho aspoň posílám kousek zpátky. Bylo v něm dobře.",
+    "Jen jsem ti chtěla poslat jednu vzpomínku, která se dnes ozvala. Má v sobě klid, smích a pocit, že bylo všechno na chvíli přesně tam, kde má být.",
+    "Dnes se mi připomněla jedna naše vzpomínka a vykouzlila mi úsměv. Takové ty obyčejné chvíle, které člověk tehdy neplánuje, a přesto mu zůstanou pod kůží.",
   ],
   JEN_TAK: [
-    "Jen jsem si vzpomněl na tebe. Bez důvodu. A udělalo mi to radost.",
-    "Dnes je klidný den. A chtěl jsem ti poslat kousek toho klidu.",
-    "Někdy stačí pár vět. Tady jsou moje — pro tebe.",
+    "Posílám ti krátké připomenutí, že někde v průběhu dne na tebe někdo mile myslel. Nic víc, nic míň. Jen tichý pozdrav.",
+    "Někdy není potřeba mít důvod, aby se člověk ozval. Stačí, že si na někoho vzpomene a chce mu udělat malou radost. Tak to dnes vyšlo na tebe.",
+    "Tenhle vzkaz nemá žádnou velkou příležitost. Jen mi přišlo hezké na chvíli se zastavit a ozvat se ti.",
   ],
 };
 
@@ -38,7 +38,7 @@ export async function generateAiText(
   category: AiTextCategory,
   context?: string
 ): Promise<string> {
-  // Optional OpenAI integration
+  // Volitelná OpenAI integrace — pokud není klíč, použijí se šablony výše
   if (process.env.OPENAI_API_KEY) {
     try {
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -53,7 +53,7 @@ export async function generateAiText(
             {
               role: "system",
               content:
-                "Jsi citlivý autor krátkých vzkazů na pohledy. Piš česky, klidně, bez klišé. Max 3 věty. Bez uvozovek.",
+                "Jsi citlivý autor krátkých vzkazů na pohledy pro značku Tichý kout. Piš česky, klidně, v ženském rodě, bez klišé. Max 3–5 vět. Bez uvozovek.",
             },
             {
               role: "user",
