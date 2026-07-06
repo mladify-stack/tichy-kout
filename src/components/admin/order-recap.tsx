@@ -5,14 +5,16 @@ import { PostcardDoublePreview } from "@/components/postcard/postcard-double-pre
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Copy } from "lucide-react";
+import type { TextColor } from "@/lib/utils";
+import { BRAND_FOOTER_NOTE } from "@/lib/postcard-constants";
 
 interface OrderRecapProps {
   imageUrl: string;
   postcardName: string;
   message: string;
   signature: string | null;
-  fontFamily: string;
-  textAlignment: string;
+  textColor: TextColor | string;
+  salutation?: string | null;
   recipientName: string;
   street: string;
   city: string;
@@ -21,10 +23,8 @@ interface OrderRecapProps {
   phone: string | null | undefined;
 }
 
-function formatPostalCode(code: string) {
-  const digits = code.replace(/\s/g, "");
-  if (digits.length === 5) return `${digits.slice(0, 3)} ${digits.slice(3)}`;
-  return code;
+function formatPostalLine(code: string) {
+  return code.replace(/\s/g, "");
 }
 
 export function OrderRecap({
@@ -32,8 +32,8 @@ export function OrderRecap({
   postcardName,
   message,
   signature,
-  fontFamily,
-  textAlignment,
+  textColor,
+  salutation,
   recipientName,
   street,
   city,
@@ -43,17 +43,23 @@ export function OrderRecap({
 }: OrderRecapProps) {
   const [copied, setCopied] = useState<string | null>(null);
 
-  const addressBlock = [
+  const addressLines = [
+    salutation,
     recipientName,
     street,
-    `${formatPostalCode(postalCode)} ${city}`,
+    formatPostalLine(postalCode),
+    city,
+  ].filter(Boolean);
+
+  const addressBlock = addressLines.join("\n");
+
+  const messageBlock = [
+    message,
+    signature ? `— ${signature}` : null,
+    BRAND_FOOTER_NOTE,
   ]
     .filter(Boolean)
-    .join("\n");
-
-  const messageBlock = signature
-    ? `${message}\n\n— ${signature}`
-    : message;
+    .join("\n\n");
 
   const copy = async (text: string, key: string) => {
     await navigator.clipboard.writeText(text);
@@ -70,9 +76,15 @@ export function OrderRecap({
           imageUrl={imageUrl}
           message={message}
           signature={signature}
-          fontFamily={fontFamily}
-          textAlignment={textAlignment}
+          textColor={textColor}
           size="lg"
+          address={{
+            salutation: salutation ?? undefined,
+            name: recipientName,
+            street,
+            city,
+            postalCode,
+          }}
         />
       </section>
 
@@ -94,13 +106,15 @@ export function OrderRecap({
             </Button>
           </CardHeader>
           <CardContent>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed">{messageBlock}</p>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed font-handwriting">
+              {messageBlock}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-base">Adresa doručení</CardTitle>
+            <CardTitle className="text-base">Adresa na pohledu</CardTitle>
             <Button
               variant="ghost"
               size="sm"
@@ -116,11 +130,11 @@ export function OrderRecap({
           </CardHeader>
           <CardContent>
             <address className="not-italic text-sm leading-relaxed">
-              {recipientName}
-              <br />
-              {street}
-              <br />
-              {formatPostalCode(postalCode)} {city}
+              {addressLines.map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
             </address>
           </CardContent>
         </Card>
@@ -149,8 +163,8 @@ export function OrderRecap({
         <p className="font-medium text-foreground">Pro ruční zadání do České pošty</p>
         <ol className="mt-2 list-inside list-decimal space-y-1">
           <li>Stáhněte nebo zkopírujte obrázek z líc pohledu</li>
-          <li>Vložte vzkaz z rubu</li>
-          <li>Zadejte adresu doručení (bez e-mailu a telefonu)</li>
+          <li>Vložte vzkaz z rubu (včetně poznámky o tichy-kout.cz)</li>
+          <li>Zadejte adresu ve stejném pořadí: oslovení, jméno, ulice, PSČ, město</li>
         </ol>
       </section>
     </div>

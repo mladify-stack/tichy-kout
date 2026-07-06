@@ -1,22 +1,28 @@
 import { z } from "zod";
+import { MAX_MESSAGE_LENGTH } from "./utils";
+
+const textColorEnum = z.enum(["BLUE", "BLACK", "RED", "GREEN"]);
 
 export const messageSchema = z.object({
   message: z
     .string()
     .min(10, "Vzkaz musí mít alespoň 10 znaků")
-    .max(500, "Vzkaz může mít maximálně 500 znaků"),
+    .max(
+      MAX_MESSAGE_LENGTH,
+      `Vzkaz může mít maximálně ${MAX_MESSAGE_LENGTH} znaků`
+    ),
   signature: z
     .string()
     .max(100, "Podpis může mít maximálně 100 znaků")
     .optional()
     .nullable(),
-  fontFamily: z.enum(["SERIF", "SANS", "HANDWRITING", "ELEGANT"]),
-  textAlignment: z.enum(["LEFT", "CENTER", "RIGHT"]),
+  textColor: textColorEnum.default("BLUE"),
   postcardId: z.string().cuid(),
 });
 
 export const shippingSchema = z.object({
-  recipientName: z.string().min(2, "Zadejte jméno příjemce"),
+  salutation: z.string().max(50, "Oslovení je příliš dlouhé").optional(),
+  recipientName: z.string().min(2, "Zadejte jméno a příjmení příjemce"),
   street: z.string().min(3, "Zadejte ulici a číslo popisné"),
   city: z.string().min(2, "Zadejte město"),
   postalCode: z

@@ -22,6 +22,7 @@ export async function GET() {
   const headers = [
     "Číslo objednávky",
     "Stav",
+    "Oslovení",
     "Příjemce",
     "E-mail",
     "Ulice",
@@ -36,6 +37,7 @@ export async function GET() {
   const rows = orders.map((o) => [
     o.orderNumber,
     ORDER_STATUS_LABELS[o.status] ?? o.status,
+    o.shippingAddress?.salutation ?? "",
     o.recipientName ?? "",
     o.recipientEmail ?? "",
     o.shippingAddress?.street ?? "",

@@ -34,6 +34,9 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
   const item = order.items[0];
   if (!item) notFound();
 
+  const previewData = item.previewData as { textColor?: string } | null;
+  const textColor = previewData?.textColor ?? "BLUE";
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
@@ -68,8 +71,8 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
         postcardName={item.postcard.name}
         message={item.message}
         signature={item.signature}
-        fontFamily={item.fontFamily}
-        textAlignment={item.textAlignment}
+        textColor={textColor}
+        salutation={order.shippingAddress?.salutation}
         recipientName={order.recipientName ?? order.shippingAddress?.name ?? ""}
         street={order.shippingAddress?.street ?? ""}
         city={order.shippingAddress?.city ?? ""}

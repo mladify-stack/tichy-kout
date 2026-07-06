@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import type { TextColor } from "@/lib/utils";
 
 export interface PostcardDraft {
   postcardId: string;
@@ -9,8 +10,7 @@ export interface PostcardDraft {
   imageUrl: string;
   message: string;
   signature: string;
-  fontFamily: "SERIF" | "SANS" | "HANDWRITING" | "ELEGANT";
-  textAlignment: "LEFT" | "CENTER" | "RIGHT";
+  textColor: TextColor;
   priceCents: number;
 }
 
@@ -23,8 +23,7 @@ const defaultDraft: PostcardDraft = {
   imageUrl: "",
   message: "",
   signature: "",
-  fontFamily: "HANDWRITING",
-  textAlignment: "CENTER",
+  textColor: "BLUE",
   priceCents: 8900,
 };
 
@@ -36,7 +35,12 @@ export function usePostcardDraft() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        setDraftState({ ...defaultDraft, ...JSON.parse(stored) });
+        const parsed = JSON.parse(stored);
+        setDraftState({
+          ...defaultDraft,
+          ...parsed,
+          textColor: parsed.textColor ?? "BLUE",
+        });
       }
     } catch {
       // ignore corrupt storage

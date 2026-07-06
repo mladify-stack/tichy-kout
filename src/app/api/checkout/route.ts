@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import { sanitizeText, generateOrderNumber, POSTCARD_PRICE_CENTS } from "@/lib/utils";
+import { sanitizeText, generateOrderNumber, POSTCARD_PRICE_CENTS, MAX_MESSAGE_LENGTH } from "@/lib/utils";
 import { shippingSchema } from "@/lib/validations";
 import { z } from "zod";
 
@@ -12,10 +12,9 @@ const checkoutSchema = z.object({
   shipping: shippingSchema,
   draft: z.object({
     postcardId: z.string(),
-    message: z.string().min(10).max(500),
+    message: z.string().min(10).max(MAX_MESSAGE_LENGTH),
     signature: z.string().max(100).optional(),
-    fontFamily: z.enum(["SERIF", "SANS", "HANDWRITING", "ELEGANT"]),
-    textAlignment: z.enum(["LEFT", "CENTER", "RIGHT"]),
+    textColor: z.enum(["BLUE", "BLACK", "RED", "GREEN"]).default("BLUE"),
     priceCents: z.number().optional(),
   }),
 });
@@ -49,6 +48,9 @@ export async function POST(request: NextRequest) {
     const address = await prisma.address.create({
       data: {
         userId: session?.user?.id,
+        salutation: shipping.salutation
+          ? sanitizeText(shipping.salutation)
+          : null,
         name: shipping.recipientName,
         street: sanitizeText(shipping.street),
         city: sanitizeText(shipping.city),
@@ -74,10 +76,11 @@ export async function POST(request: NextRequest) {
             postcardId: postcard.id,
             message: sanitizeText(draft.message),
             signature: draft.signature ? sanitizeText(draft.signature) : null,
-            fontFamily: draft.fontFamily,
-            textAlignment: draft.textAlignment,
+            fontFamily: "HANDWRITING",
+            textAlignment: "LEFT",
             charCount: draft.message.length,
             priceCents: total,
+            previewData: { textColor: draft.textColor ?? "BLUE" },
           },
         },
         payment: {

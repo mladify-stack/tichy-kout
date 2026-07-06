@@ -23,6 +23,12 @@ export default function CartPage() {
     defaultValues: { country: "CZ" },
   });
 
+  const salutation = form.watch("salutation");
+  const recipientName = form.watch("recipientName");
+  const street = form.watch("street");
+  const city = form.watch("city");
+  const postalCode = form.watch("postalCode");
+
   const total = POSTCARD_PRICE_CENTS;
 
   const onSubmit = async (data: ShippingFormData) => {
@@ -77,9 +83,15 @@ export default function CartPage() {
             imageUrl={draft.imageUrl}
             message={draft.message}
             signature={draft.signature}
-            fontFamily={draft.fontFamily}
-            textAlignment={draft.textAlignment}
+            textColor={draft.textColor}
             size="lg"
+            address={{
+              salutation: salutation || undefined,
+              name: recipientName || undefined,
+              street: street || undefined,
+              city: city || undefined,
+              postalCode: postalCode || undefined,
+            }}
           />
         </div>
 
@@ -105,17 +117,28 @@ export default function CartPage() {
 
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <fieldset className="space-y-4">
-              <legend className="font-serif text-xl">Kam pohled doručíme?</legend>
+              <legend className="font-serif text-xl">Adresát</legend>
               <p className="text-sm text-muted-foreground">
-                Adresa pro doručení poštou
+                Stejný vzor jako v aplikaci České pošty
               </p>
 
               <div>
-                <Label htmlFor="recipientName">Jméno příjemce</Label>
+                <Label htmlFor="salutation">Oslovení (nepovinné)</Label>
+                <Input
+                  id="salutation"
+                  {...form.register("salutation")}
+                  className="mt-1"
+                  placeholder="Manželé"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="recipientName">Jméno a příjmení</Label>
                 <Input
                   id="recipientName"
                   {...form.register("recipientName")}
                   className="mt-1"
+                  placeholder="Vavřičkovi"
                 />
                 {form.formState.errors.recipientName && (
                   <p className="mt-1 text-xs text-destructive" role="alert">
@@ -125,8 +148,13 @@ export default function CartPage() {
               </div>
 
               <div>
-                <Label htmlFor="street">Ulice a číslo</Label>
-                <Input id="street" {...form.register("street")} className="mt-1" />
+                <Label htmlFor="street">Ulice a číslo popisné</Label>
+                <Input
+                  id="street"
+                  {...form.register("street")}
+                  className="mt-1"
+                  placeholder="Družstevní 114"
+                />
                 {form.formState.errors.street && (
                   <p className="mt-1 text-xs text-destructive" role="alert">
                     {form.formState.errors.street.message}
@@ -134,30 +162,34 @@ export default function CartPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="city">Město</Label>
-                  <Input id="city" {...form.register("city")} className="mt-1" />
-                  {form.formState.errors.city && (
-                    <p className="mt-1 text-xs text-destructive" role="alert">
-                      {form.formState.errors.city.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="postalCode">PSČ</Label>
-                  <Input
-                    id="postalCode"
-                    {...form.register("postalCode")}
-                    className="mt-1"
-                    placeholder="123 45"
-                  />
-                  {form.formState.errors.postalCode && (
-                    <p className="mt-1 text-xs text-destructive" role="alert">
-                      {form.formState.errors.postalCode.message}
-                    </p>
-                  )}
-                </div>
+              <div>
+                <Label htmlFor="city">Město</Label>
+                <Input
+                  id="city"
+                  {...form.register("city")}
+                  className="mt-1"
+                  placeholder="Cvikov"
+                />
+                {form.formState.errors.city && (
+                  <p className="mt-1 text-xs text-destructive" role="alert">
+                    {form.formState.errors.city.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="postalCode">PSČ</Label>
+                <Input
+                  id="postalCode"
+                  {...form.register("postalCode")}
+                  className="mt-1"
+                  placeholder="47154"
+                />
+                {form.formState.errors.postalCode && (
+                  <p className="mt-1 text-xs text-destructive" role="alert">
+                    {form.formState.errors.postalCode.message}
+                  </p>
+                )}
               </div>
             </fieldset>
 

@@ -1,57 +1,189 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { FONT_OPTIONS } from "@/lib/utils";
+import {
+  POSTCARD_MESSAGE_FONT,
+  getTextColorClass,
+} from "@/lib/utils";
+import type { TextColor } from "@/lib/utils";
 import { PostcardImage } from "./postcard-image";
+
+export interface PostcardAddressPreview {
+  salutation?: string;
+  name?: string;
+  street?: string;
+  city?: string;
+  postalCode?: string;
+}
 
 interface PostcardDoublePreviewProps {
   imageUrl: string;
   message: string;
   signature?: string | null;
-  fontFamily: string;
-  textAlignment: string;
+  textColor?: TextColor | string;
   size?: "sm" | "md" | "lg";
   className?: string;
   showLabels?: boolean;
+  address?: PostcardAddressPreview;
 }
 
-const alignmentMap = {
-  LEFT: "text-left items-start",
-  CENTER: "text-center items-center",
-  RIGHT: "text-right items-end",
-};
+import { BRAND_FOOTER_NOTE } from "@/lib/postcard-constants";
 
-/** Náhled pohledu — líc (obrázek) a rub (text), jako skutečná pohlednice */
+function PostcardBack({
+  message,
+  signature,
+  textColor,
+  size,
+  address,
+}: {
+  message: string;
+  signature?: string | null;
+  textColor?: TextColor | string;
+  size: "sm" | "md" | "lg";
+  address?: PostcardAddressPreview;
+}) {
+  const colorClass = getTextColorClass(textColor);
+
+  const textSize = {
+    sm: "text-[8px]",
+    md: "text-[10px]",
+    lg: "text-[11px]",
+  }[size];
+
+  const addressSize = {
+    sm: "text-[7px]",
+    md: "text-[9px]",
+    lg: "text-[10px]",
+  }[size];
+
+  const footerSize = {
+    sm: "text-[6px]",
+    md: "text-[7px]",
+    lg: "text-[8px]",
+  }[size];
+
+  const stampSize = {
+    sm: "h-[42%] w-[70%]",
+    md: "h-[42%] w-[70%]",
+    lg: "h-[42%] w-[68%]",
+  }[size];
+
+  const hasAddress = Boolean(
+    address?.salutation ||
+      address?.name ||
+      address?.street ||
+      address?.city ||
+      address?.postalCode
+  );
+
+  const postalDigits = address?.postalCode?.replace(/\s/g, "") ?? "";
+
+  return (
+    <div className="absolute inset-0 flex bg-white">
+      {/* Levá polovina — vzkaz (jako v aplikaci České pošty) */}
+      <div className="flex min-w-0 flex-1 flex-col border-r border-sage-300/60 p-2 sm:p-2.5">
+        <div className="min-h-0 flex-1 overflow-hidden text-left">
+          <p
+            className={cn(
+              "whitespace-pre-wrap leading-[1.35]",
+              POSTCARD_MESSAGE_FONT,
+              textSize,
+              colorClass
+            )}
+          >
+            {message || "Váš vzkaz se objeví zde…"}
+          </p>
+          {signature && (
+            <p
+              className={cn(
+                "mt-1",
+                POSTCARD_MESSAGE_FONT,
+                textSize,
+                colorClass
+              )}
+            >
+              — {signature}
+            </p>
+          )}
+        </div>
+        <p
+          className={cn(
+            "mt-1 shrink-0 leading-tight text-sage-500 italic",
+            footerSize
+          )}
+        >
+          {BRAND_FOOTER_NOTE}
+        </p>
+      </div>
+
+      {/* Pravá polovina — známka nahoře, adresa dole */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Známka */}
+        <div className="flex flex-1 items-start justify-end border-b border-sage-300/60 p-2">
+          <div
+            className={cn(
+              "rounded-sm border border-dashed border-sage-400/70 bg-sage-50/50",
+              stampSize
+            )}
+            aria-hidden
+          />
+        </div>
+
+        {/* Adresa — vzor České pošty */}
+        <div className="flex flex-1 flex-col justify-end p-2 sm:p-2.5">
+          {hasAddress ? (
+            <address
+              className={cn(
+                "not-italic leading-[1.45] font-sans",
+                addressSize,
+                colorClass
+              )}
+            >
+              {address?.salutation && <div>{address.salutation}</div>}
+              {address?.name && <div>{address.name}</div>}
+              {address?.street && <div>{address.street}</div>}
+              {postalDigits && <div>{postalDigits}</div>}
+              {address?.city && <div>{address.city}</div>}
+            </address>
+          ) : (
+            <div className="space-y-1.5" aria-hidden>
+              {[0, 1, 2, 3, 4].map((line) => (
+                <div
+                  key={line}
+                  className={cn(
+                    "border-b border-sage-300/45",
+                    size === "lg" ? "h-2.5" : "h-2"
+                  )}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Náhled pohledu — líc (obrázek) a rub (text vlevo, adresa vpravo) */
 export function PostcardDoublePreview({
   imageUrl,
   message,
   signature,
-  fontFamily,
-  textAlignment,
+  textColor = "BLUE",
   size = "md",
   className,
   showLabels = true,
+  address,
 }: PostcardDoublePreviewProps) {
-  const fontClass =
-    FONT_OPTIONS.find((f) => f.value === fontFamily)?.className ??
-    "font-handwriting";
-
   const cardWidth = {
-    sm: "w-[140px]",
-    md: "w-[180px]",
-    lg: "w-[220px]",
-  }[size];
-
-  const textSize = {
-    sm: "text-xs",
-    md: "text-sm",
-    lg: "text-base",
+    sm: "w-[160px]",
+    md: "w-[240px]",
+    lg: "w-[320px]",
   }[size];
 
   return (
     <div className={cn("flex flex-col items-center gap-3", className)}>
       <div className="flex flex-wrap items-start justify-center gap-4 sm:gap-6">
-        {/* Líc — pouze fotografie */}
         <div className="flex flex-col items-center gap-2">
           {showLabels && (
             <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -68,12 +200,11 @@ export function PostcardDoublePreview({
               src={imageUrl}
               alt="Přední strana pohledu"
               className="object-cover"
-              sizes="220px"
+              sizes="320px"
             />
           </div>
         </div>
 
-        {/* Rub — text na papíru */}
         <div className="flex flex-col items-center gap-2">
           {showLabels && (
             <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -82,40 +213,17 @@ export function PostcardDoublePreview({
           )}
           <div
             className={cn(
-              "relative aspect-[3/2] overflow-hidden rounded-md border border-border/60 shadow-md bg-[#f7f3eb]",
+              "relative aspect-[3/2] overflow-hidden rounded-md border border-border/60 shadow-md",
               cardWidth
             )}
           >
-            {/* Jemná linka jako okraj pohlednice */}
-            <div className="absolute inset-2 rounded-sm border border-sage-200/80" aria-hidden />
-            <div
-              className={cn(
-                "absolute inset-0 flex flex-col justify-center px-4 py-3",
-                alignmentMap[textAlignment as keyof typeof alignmentMap] ??
-                  alignmentMap.CENTER
-              )}
-            >
-              <p
-                className={cn(
-                  "whitespace-pre-wrap text-sage-800 leading-relaxed",
-                  fontClass,
-                  textSize
-                )}
-              >
-                {message || "Váš vzkaz se objeví zde…"}
-              </p>
-              {signature && (
-                <p
-                  className={cn(
-                    "mt-2 text-sage-600",
-                    fontClass,
-                    size === "sm" ? "text-[10px]" : "text-sm"
-                  )}
-                >
-                  — {signature}
-                </p>
-              )}
-            </div>
+            <PostcardBack
+              message={message}
+              signature={signature}
+              textColor={textColor}
+              size={size}
+              address={address}
+            />
           </div>
         </div>
       </div>

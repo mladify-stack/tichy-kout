@@ -42,7 +42,7 @@ export function truncate(text: string, maxLength: number): string {
 export const APP_NAME = "Tichý kout";
 export const APP_DESCRIPTION =
   "Napište krásný pohled někomu, na kom vám záleží. My jej vytiskneme a fyzicky odešleme poštou.";
-export const MAX_MESSAGE_LENGTH = 500;
+export const MAX_MESSAGE_LENGTH = 480;
 export const POSTCARD_PRICE_CENTS =
   Number(process.env.NEXT_PUBLIC_POSTCARD_PRICE) || 8900;
 /** Poštovné je zahrnuto v ceně pohledu */
@@ -54,6 +54,32 @@ export const FONT_OPTIONS = [
   { value: "SANS", label: "Jednoduché", className: "font-sans" },
   { value: "ELEGANT", label: "Elegantní", className: "font-elegant" },
 ] as const;
+
+/** Jediný font pro text na pohledu */
+export const POSTCARD_MESSAGE_FONT = "font-handwriting";
+
+export const TEXT_COLOR_OPTIONS = [
+  { value: "BLUE", label: "Modrá", className: "text-[#2B5FAD]", swatch: "#2B5FAD" },
+  { value: "BLACK", label: "Černá", className: "text-[#1a1a1a]", swatch: "#1a1a1a" },
+  { value: "RED", label: "Červená", className: "text-[#C41E3A]", swatch: "#C41E3A" },
+  { value: "GREEN", label: "Zelená", className: "text-[#2D6A4F]", swatch: "#2D6A4F" },
+] as const;
+
+export type TextColor = (typeof TEXT_COLOR_OPTIONS)[number]["value"];
+
+export function getTextColorClass(color?: string | null): string {
+  return (
+    TEXT_COLOR_OPTIONS.find((c) => c.value === color)?.className ??
+    TEXT_COLOR_OPTIONS[0].className
+  );
+}
+
+/** Skloňování pro odpočet zbývajících znaků */
+export function formatRemainingChars(remaining: number): string {
+  if (remaining === 1) return "Zbývá 1 znak";
+  if (remaining >= 2 && remaining <= 4) return `Zbývají ${remaining} znaky`;
+  return `Zbývá ${remaining} znaků`;
+}
 
 export const ALIGNMENT_OPTIONS = [
   { value: "LEFT", label: "Vlevo" },

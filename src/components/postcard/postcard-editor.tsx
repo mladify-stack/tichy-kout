@@ -11,23 +11,17 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { usePostcardDraft } from "@/hooks/use-postcard-draft";
 import { messageSchema, type MessageFormData } from "@/lib/validations";
 import {
   MAX_MESSAGE_LENGTH,
-  FONT_OPTIONS,
-  ALIGNMENT_OPTIONS,
+  TEXT_COLOR_OPTIONS,
   AI_CATEGORIES,
   formatPrice,
+  formatRemainingChars,
   POSTCARD_PRICE_CENTS,
 } from "@/lib/utils";
+import type { TextColor } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 interface PostcardEditorProps {
@@ -45,7 +39,6 @@ export function PostcardEditor({
   postcardSlug,
   postcardName,
   imageUrl,
-  priceCents,
 }: PostcardEditorProps) {
   const router = useRouter();
   const { draft, setDraft } = usePostcardDraft();
@@ -59,16 +52,15 @@ export function PostcardEditor({
       postcardId,
       message: draft.postcardId === postcardId ? draft.message : "",
       signature: draft.postcardId === postcardId ? draft.signature ?? "" : "",
-      fontFamily: draft.postcardId === postcardId ? draft.fontFamily : "HANDWRITING",
-      textAlignment: draft.postcardId === postcardId ? draft.textAlignment : "CENTER",
+      textColor:
+        draft.postcardId === postcardId ? draft.textColor : "BLUE",
     },
   });
 
   const message = form.watch("message");
   const signature = form.watch("signature");
-  const fontFamily = form.watch("fontFamily");
-  const textAlignment = form.watch("textAlignment");
-  const charCount = message.length;
+  const textColor = form.watch("textColor");
+  const remaining = MAX_MESSAGE_LENGTH - message.length;
 
   const syncDraft = (data: Partial<MessageFormData>) => {
     setDraft({
@@ -79,8 +71,7 @@ export function PostcardEditor({
       priceCents: POSTCARD_PRICE_CENTS,
       message: data.message ?? message,
       signature: data.signature ?? signature ?? "",
-      fontFamily: (data.fontFamily ?? fontFamily) as typeof draft.fontFamily,
-      textAlignment: (data.textAlignment ?? textAlignment) as typeof draft.textAlignment,
+      textColor: (data.textColor ?? textColor) as TextColor,
     });
   };
 
@@ -95,8 +86,9 @@ export function PostcardEditor({
       });
       if (res.ok) {
         const { text } = await res.json();
-        form.setValue("message", text, { shouldValidate: true });
-        syncDraft({ message: text });
+        const trimmed = text.slice(0, MAX_MESSAGE_LENGTH);
+        form.setValue("message", trimmed, { shouldValidate: true });
+        syncDraft({ message: trimmed });
       }
     } finally {
       setAiLoading(false);
@@ -107,15 +99,19 @@ export function PostcardEditor({
   const onSubmit = async (data: MessageFormData) => {
     syncDraft(data);
     setStep("preparing");
-
-    // Simulace přípravy pohledu — investovaný čas
     await new Promise((r) => setTimeout(r, 2500));
-
     setStep("ready");
   };
 
   const handleSend = () => {
     router.push("/kosik");
+  };
+
+  const previewProps = {
+    imageUrl,
+    message,
+    signature,
+    textColor,
   };
 
   if (step === "preparing" || step === "ready") {
@@ -134,14 +130,7 @@ export function PostcardEditor({
               <p className="font-serif text-2xl text-foreground">
                 Připravujeme váš pohled…
               </p>
-              <PostcardDoublePreview
-                imageUrl={imageUrl}
-                message={message}
-                signature={signature}
-                fontFamily={fontFamily}
-                textAlignment={textAlignment}
-                size="md"
-              />
+              <PostcardDoublePreview {...previewProps} size="md" />
             </motion.div>
           )}
           {step === "ready" && (
@@ -162,14 +151,7 @@ export function PostcardEditor({
                 ❤️
               </motion.span>
               <h2 className="font-serif text-3xl">Váš pohled je připraven.</h2>
-              <PostcardDoublePreview
-                imageUrl={imageUrl}
-                message={message}
-                signature={signature}
-                fontFamily={fontFamily}
-                textAlignment={textAlignment}
-                size="lg"
-              />
+              <PostcardDoublePreview {...previewProps} size="lg" />
               <p className="text-muted-foreground">
                 Až budete připraveni, odešleme ho poštou někomu, na kom vám záleží.
               </p>
@@ -192,35 +174,30 @@ export function PostcardEditor({
 
   return (
     <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-2 lg:gap-12 lg:px-6">
-      {/* Levá — náhled */}
       <div className="flex flex-col items-center lg:sticky lg:top-24 lg:self-start">
-        <PostcardDoublePreview
-          imageUrl={imageUrl}
-          message={message}
-          signature={signature}
-          fontFamily={fontFamily}
-          textAlignment={textAlignment}
-          size="lg"
-        />
+        <PostcardDoublePreview {...previewProps} size="lg" />
         <p className="mt-4 text-sm text-muted-foreground">{postcardName}</p>
       </div>
 
-      {/* Pravá — editor */}
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div>
           <Label htmlFor="message">Váš vzkaz</Label>
           <Textarea
             id="message"
+            maxLength={MAX_MESSAGE_LENGTH}
             {...form.register("message", {
               onChange: (e) => syncDraft({ message: e.target.value }),
             })}
             placeholder="Napište, co chcete říct…"
-            className="mt-2 min-h-[160px] font-serif text-base"
+            className={cn(
+              "mt-2 min-h-[200px] font-handwriting text-base leading-relaxed",
+              TEXT_COLOR_OPTIONS.find((c) => c.value === textColor)?.className
+            )}
             aria-describedby="char-count message-error"
           />
           <div className="mt-1 flex justify-between text-xs text-muted-foreground">
             <span id="char-count" aria-live="polite">
-              {charCount} / {MAX_MESSAGE_LENGTH} znaků
+              {formatRemainingChars(Math.max(0, remaining))}
             </span>
             {form.formState.errors.message && (
               <span id="message-error" className="text-destructive" role="alert">
@@ -230,7 +207,32 @@ export function PostcardEditor({
           </div>
         </div>
 
-        {/* AI pomocník */}
+        <div>
+          <Label>Barva textu</Label>
+          <div className="mt-2 flex gap-3" role="radiogroup" aria-label="Barva textu">
+            {TEXT_COLOR_OPTIONS.map((color) => (
+              <button
+                key={color.value}
+                type="button"
+                role="radio"
+                aria-checked={textColor === color.value}
+                onClick={() => {
+                  form.setValue("textColor", color.value);
+                  syncDraft({ textColor: color.value });
+                }}
+                className={cn(
+                  "h-9 w-9 rounded-full border-2 transition-transform hover:scale-105",
+                  textColor === color.value
+                    ? "border-primary ring-2 ring-primary/30"
+                    : "border-transparent"
+                )}
+                style={{ backgroundColor: color.swatch }}
+                title={color.label}
+              />
+            ))}
+          </div>
+        </div>
+
         <div className="rounded-lg border border-border/60 bg-warm-50/50 p-4">
           <div className="mb-3 flex items-center gap-2 text-sm font-medium">
             <Sparkles className="h-4 w-4 text-sage-500" aria-hidden />
@@ -257,50 +259,6 @@ export function PostcardEditor({
         </div>
 
         <div>
-          <Label htmlFor="font">Písmo</Label>
-          <Select
-            value={fontFamily}
-            onValueChange={(v) => {
-              form.setValue("fontFamily", v as MessageFormData["fontFamily"]);
-              syncDraft({ fontFamily: v as MessageFormData["fontFamily"] });
-            }}
-          >
-            <SelectTrigger id="font" className="mt-2">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {FONT_OPTIONS.map((f) => (
-                <SelectItem key={f.value} value={f.value}>
-                  <span className={f.className}>{f.label}</span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="alignment">Zarovnání</Label>
-          <Select
-            value={textAlignment}
-            onValueChange={(v) => {
-              form.setValue("textAlignment", v as MessageFormData["textAlignment"]);
-              syncDraft({ textAlignment: v as MessageFormData["textAlignment"] });
-            }}
-          >
-            <SelectTrigger id="alignment" className="mt-2">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {ALIGNMENT_OPTIONS.map((a) => (
-                <SelectItem key={a.value} value={a.value}>
-                  {a.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
           <Label htmlFor="signature">Podpis</Label>
           <Input
             id="signature"
@@ -308,7 +266,7 @@ export function PostcardEditor({
               onChange: (e) => syncDraft({ signature: e.target.value }),
             })}
             placeholder="Vaše jméno nebo přezdívka"
-            className="mt-2"
+            className="mt-2 font-handwriting"
           />
         </div>
 
