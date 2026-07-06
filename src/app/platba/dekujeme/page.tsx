@@ -4,7 +4,8 @@ import { createMetadata } from "@/lib/seo";
 
 export const metadata = createMetadata({
   title: "Děkujeme",
-  description: "Vaše objednávka byla přijata. Brzy vytiskneme a odešleme váš pohled.",
+  description:
+    "Vaše objednávka byla přijata. Následující den vytiskneme a odešleme váš pohled poštou.",
   noIndex: true,
 });
 
@@ -20,11 +21,11 @@ export default async function ThankYouPage({ searchParams }: PageProps) {
       <span className="text-5xl" role="img" aria-label="Srdce">❤️</span>
       <h1 className="mt-6 font-serif text-3xl">Děkujeme</h1>
       <p className="mt-4 text-muted-foreground">
-        Váš pohled jsme přijali. Brzy jej vytiskneme a odešleme poštou.
+        Váš pohled jsme přijali. Následující den jej vytiskneme a odešleme poštou.
       </p>
       {session_id && (
-        <p className="mt-2 text-xs text-muted-foreground">
-          Potvrzení jsme odeslali na váš e-mail.
+        <p className="mt-2 text-sm text-muted-foreground">
+          Potvrzení jsme odeslali na Váš e-mail.
         </p>
       )}
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
