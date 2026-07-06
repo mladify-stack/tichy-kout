@@ -16,6 +16,9 @@ const checkoutSchema = z.object({
     signature: z.string().max(100).optional(),
     textColor: z.enum(["BLUE", "BLACK", "RED", "GREEN"]).default("BLUE"),
     priceCents: z.number().optional(),
+    isCustomPhoto: z.boolean().optional(),
+    customImageData: z.string().optional(),
+    imageUrl: z.string().optional(),
   }),
 });
 
@@ -80,7 +83,14 @@ export async function POST(request: NextRequest) {
             textAlignment: "LEFT",
             charCount: draft.message.length,
             priceCents: total,
-            previewData: { textColor: draft.textColor ?? "BLUE" },
+            previewData: {
+              textColor: draft.textColor ?? "BLUE",
+              isCustomPhoto: draft.isCustomPhoto ?? false,
+              customImageData: draft.customImageData ?? null,
+              imageUrl: draft.isCustomPhoto
+                ? draft.customImageData ?? draft.imageUrl
+                : postcard.imageUrl,
+            },
           },
         },
         payment: {

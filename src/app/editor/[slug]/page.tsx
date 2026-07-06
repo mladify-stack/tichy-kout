@@ -41,6 +41,7 @@ export default async function EditorPage({ params }: PageProps) {
         postcardName={postcard.name}
         imageUrl={postcard.imageUrl}
         priceCents={POSTCARD_PRICE_CENTS}
+        isCustomPhoto={postcard.slug === "vlastni-fotka"}
       />
     </div>
   );

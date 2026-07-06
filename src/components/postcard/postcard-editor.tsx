@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Loader2 } from "lucide-react";
 import { PostcardDoublePreview } from "./postcard-double-preview";
+import { CustomPhotoUpload } from "./custom-photo-upload";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,19 +31,27 @@ interface PostcardEditorProps {
   postcardName: string;
   imageUrl: string;
   priceCents: number;
+  isCustomPhoto?: boolean;
 }
 
-type EditorStep = "edit" | "preparing" | "ready";
+type EditorStep = "upload" | "edit" | "preparing" | "ready";
 
 export function PostcardEditor({
   postcardId,
   postcardSlug,
   postcardName,
   imageUrl,
+  isCustomPhoto = false,
 }: PostcardEditorProps) {
   const router = useRouter();
   const { draft, setDraft } = usePostcardDraft();
-  const [step, setStep] = useState<EditorStep>("edit");
+  const hasCustomImage =
+    isCustomPhoto &&
+    draft.postcardId === postcardId &&
+    Boolean(draft.customImageData);
+  const [step, setStep] = useState<EditorStep>(
+    isCustomPhoto && !hasCustomImage ? "upload" : "edit"
+  );
   const [aiLoading, setAiLoading] = useState(false);
   const [aiCategory, setAiCategory] = useState<string | null>(null);
 
@@ -62,17 +71,42 @@ export function PostcardEditor({
   const textColor = form.watch("textColor");
   const remaining = MAX_MESSAGE_LENGTH - message.length;
 
+  const displayImageUrl =
+    isCustomPhoto && draft.customImageData
+      ? draft.customImageData
+      : draft.postcardId === postcardId
+        ? draft.imageUrl
+        : imageUrl;
+
   const syncDraft = (data: Partial<MessageFormData>) => {
     setDraft({
       postcardId,
       postcardSlug,
       postcardName,
-      imageUrl,
+      imageUrl: displayImageUrl,
       priceCents: POSTCARD_PRICE_CENTS,
       message: data.message ?? message,
       signature: data.signature ?? signature ?? "",
       textColor: (data.textColor ?? textColor) as TextColor,
+      isCustomPhoto,
+      customImageData: isCustomPhoto ? draft.customImageData : undefined,
     });
+  };
+
+  const handlePhotoUploaded = (dataUrl: string) => {
+    setDraft({
+      postcardId,
+      postcardSlug,
+      postcardName,
+      imageUrl: dataUrl,
+      message: draft.postcardId === postcardId ? draft.message : "",
+      signature: draft.postcardId === postcardId ? draft.signature : "",
+      textColor: draft.postcardId === postcardId ? draft.textColor : "BLUE",
+      priceCents: POSTCARD_PRICE_CENTS,
+      isCustomPhoto: true,
+      customImageData: dataUrl,
+    });
+    setStep("edit");
   };
 
   const handleAiSuggest = async (category: string) => {
@@ -108,11 +142,26 @@ export function PostcardEditor({
   };
 
   const previewProps = {
-    imageUrl,
+    imageUrl: displayImageUrl,
     message,
     signature,
     textColor,
   };
+
+  if (step === "upload") {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-12 text-center">
+        <h2 className="font-serif text-2xl">Vlastní fotka</h2>
+        <p className="mt-2 text-muted-foreground">
+          Nahrajte fotku, která bude na přední straně pohledu.
+        </p>
+        <CustomPhotoUpload
+          className="mt-8"
+          onUploaded={handlePhotoUploaded}
+        />
+      </div>
+    );
+  }
 
   if (step === "preparing" || step === "ready") {
     return (
@@ -269,6 +318,16 @@ export function PostcardEditor({
             className="mt-2 font-handwriting"
           />
         </div>
+
+        {isCustomPhoto && (
+          <button
+            type="button"
+            onClick={() => setStep("upload")}
+            className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+          >
+            Změnit fotku
+          </button>
+        )}
 
         <Button type="submit" size="lg" className="w-full sm:w-auto">
           Zobrazit náhled

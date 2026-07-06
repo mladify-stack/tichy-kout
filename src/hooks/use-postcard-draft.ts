@@ -12,6 +12,8 @@ export interface PostcardDraft {
   signature: string;
   textColor: TextColor;
   priceCents: number;
+  isCustomPhoto?: boolean;
+  customImageData?: string;
 }
 
 const STORAGE_KEY = "tichy-kout-draft";

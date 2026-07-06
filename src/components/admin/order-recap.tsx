@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { PostcardDoublePreview } from "@/components/postcard/postcard-double-preview";
+import { downloadImage } from "@/components/postcard/custom-photo-upload";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Download } from "lucide-react";
 import type { TextColor } from "@/lib/utils";
 import { BRAND_FOOTER_NOTE } from "@/lib/postcard-constants";
 
@@ -21,6 +22,8 @@ interface OrderRecapProps {
   postalCode: string;
   customerEmail: string | null;
   phone: string | null | undefined;
+  isCustomPhoto?: boolean;
+  orderNumber: string;
 }
 
 function formatPostalLine(code: string) {
@@ -40,6 +43,8 @@ export function OrderRecap({
   postalCode,
   customerEmail,
   phone,
+  isCustomPhoto,
+  orderNumber,
 }: OrderRecapProps) {
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -70,8 +75,31 @@ export function OrderRecap({
   return (
     <div className="space-y-8">
       <section>
-        <h2 className="mb-4 font-serif text-xl">Náhled pohledu</h2>
-        <p className="mb-4 text-sm text-muted-foreground">{postcardName}</p>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-serif text-xl">Náhled pohledu</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {postcardName}
+              {isCustomPhoto && " — vlastní fotka zákazníka"}
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const src = imageUrl.startsWith("/")
+                ? `${window.location.origin}${imageUrl}`
+                : imageUrl;
+              downloadImage(
+                src,
+                `pohled-lic-${orderNumber}${isCustomPhoto ? "-vlastni" : ""}.jpg`
+              );
+            }}
+          >
+            <Download className="mr-2 h-4 w-4" aria-hidden />
+            Stáhnout líc (obrázek)
+          </Button>
+        </div>
         <PostcardDoublePreview
           imageUrl={imageUrl}
           message={message}
@@ -162,7 +190,7 @@ export function OrderRecap({
       <section className="rounded-lg bg-warm-50/50 p-4 text-sm text-muted-foreground">
         <p className="font-medium text-foreground">Pro ruční zadání do České pošty</p>
         <ol className="mt-2 list-inside list-decimal space-y-1">
-          <li>Stáhněte nebo zkopírujte obrázek z líc pohledu</li>
+          <li>Stáhněte obrázek z líc pohledu (tlačítko výše)</li>
           <li>Vložte vzkaz z rubu (včetně poznámky o tichy-kout.cz)</li>
           <li>Zadejte adresu ve stejném pořadí: oslovení, jméno, ulice, PSČ, město</li>
         </ol>

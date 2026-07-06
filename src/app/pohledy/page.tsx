@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { PostcardGallery } from "@/components/postcard/postcard-gallery";
+import { CustomPhotoCard } from "@/components/postcard/custom-photo-card";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata = createMetadata({
@@ -27,13 +28,15 @@ export default async function PostcardsPage({ searchParams }: PageProps) {
     },
   });
 
+  const visibleCategories = categories.filter((c) => c.slug !== "vlastni");
+
   const activeCategory = kategorie
-    ? categories.find((c) => c.slug === kategorie)
+    ? visibleCategories.find((c) => c.slug === kategorie)
     : null;
 
-  const postcards = activeCategory
-    ? activeCategory.postcards
-    : categories.flatMap((c) => c.postcards);
+  const allPostcards = visibleCategories.flatMap((c) => c.postcards);
+  const postcards = (activeCategory ? activeCategory.postcards : allPostcards)
+    .filter((p) => p.slug !== "vlastni-fotka");
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
@@ -59,7 +62,7 @@ export default async function PostcardsPage({ searchParams }: PageProps) {
               Vše
             </Link>
           </li>
-          {categories.map((cat) => (
+          {visibleCategories.map((cat) => (
             <li key={cat.id}>
               <Link
                 href={`/pohledy?kategorie=${cat.slug}`}
@@ -75,6 +78,8 @@ export default async function PostcardsPage({ searchParams }: PageProps) {
           ))}
         </ul>
       </nav>
+
+      <CustomPhotoCard />
 
       <PostcardGallery postcards={postcards} />
 

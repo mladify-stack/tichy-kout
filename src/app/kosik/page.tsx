@@ -80,7 +80,11 @@ export default function CartPage() {
       <div className="mt-8 grid gap-10 lg:grid-cols-2">
         <div className="flex justify-center lg:sticky lg:top-24 lg:self-start">
           <PostcardDoublePreview
-            imageUrl={draft.imageUrl}
+            imageUrl={
+              draft.customImageData && draft.isCustomPhoto
+                ? draft.customImageData
+                : draft.imageUrl
+            }
             message={draft.message}
             signature={draft.signature}
             textColor={draft.textColor}

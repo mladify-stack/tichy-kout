@@ -34,8 +34,18 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
   const item = order.items[0];
   if (!item) notFound();
 
-  const previewData = item.previewData as { textColor?: string } | null;
+  const previewData = item.previewData as {
+    textColor?: string;
+    isCustomPhoto?: boolean;
+    customImageData?: string | null;
+    imageUrl?: string;
+  } | null;
   const textColor = previewData?.textColor ?? "BLUE";
+  const isCustomPhoto = previewData?.isCustomPhoto ?? false;
+  const frontImageUrl =
+    previewData?.customImageData ??
+    previewData?.imageUrl ??
+    item.postcard.imageUrl;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
@@ -67,11 +77,13 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
       </div>
 
       <OrderRecap
-        imageUrl={item.postcard.imageUrl}
+        imageUrl={frontImageUrl}
         postcardName={item.postcard.name}
         message={item.message}
         signature={item.signature}
         textColor={textColor}
+        isCustomPhoto={isCustomPhoto}
+        orderNumber={order.orderNumber}
         salutation={order.shippingAddress?.salutation}
         recipientName={order.recipientName ?? order.shippingAddress?.name ?? ""}
         street={order.shippingAddress?.street ?? ""}

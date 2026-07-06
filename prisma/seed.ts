@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 const CATEGORIES = [
+  { slug: "vlastni", name: "Vlastní fotka", sortOrder: 0 },
   { slug: "les", name: "Les", sortOrder: 1 },
   { slug: "hory", name: "Hory", sortOrder: 2 },
   { slug: "more", name: "Moře", sortOrder: 3 },
@@ -19,6 +20,7 @@ const CATEGORIES = [
 ];
 
 const NAMES: Record<string, string[]> = {
+  vlastni: ["Vlastní fotka"],
   les: ["Tichý les", "Ranní mlha", "Mezi stromy"],
   hory: ["Výhled", "Horský klid", "Na vrcholu"],
   more: ["Pobřeží", "Vlny", "Modrá dálka"],
@@ -60,8 +62,11 @@ async function main() {
     const names = NAMES[cat.slug] ?? ["Pohled 1", "Pohled 2", "Pohled 3"];
 
     for (let i = 0; i < names.length; i++) {
-      const slug = `${cat.slug}-${i + 1}`;
-      const imageUrl = `/postcards/${slug}.png`;
+      const slug = cat.slug === "vlastni" ? "vlastni-fotka" : `${cat.slug}-${i + 1}`;
+      const imageUrl =
+        cat.slug === "vlastni"
+          ? "/postcards/vlastni-fotka.png"
+          : `/postcards/${slug}.png`;
 
       await prisma.postcard.upsert({
         where: { slug },
